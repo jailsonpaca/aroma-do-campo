@@ -1,7 +1,10 @@
 # Sistema Aroma do Campo
 
 **Screenshots:**
-
+<p align="center">
+  <img src="https://drive.google.com/file/d/14iZOrDu0f79Pog4sC5IxORKVu1mAUs0p/view?usp=sharing" width="350" title="hover text">
+  <img src="your_relative_path_here_number_2_large_name" width="350" alt="accessibility text">
+</p>
 ![Screenshot](https://drive.google.com/file/d/14iZOrDu0f79Pog4sC5IxORKVu1mAUs0p/view?usp=sharing)
 
 
