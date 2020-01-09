@@ -1,22 +1,59 @@
 {
-  "name": "electron-quick-start",
+  "name": "aroma-do-campo",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "Sistema de Gerenciamento Aroma do Campo",
+  "author": "jailson pacagnan santana",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
-  ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "build": {
+    "appId": "AromaDoCampo",
+    "win": {
+      "target": "NSIS",
+      "icon": "build/icon.ico"
+    },
+    "extraFiles": [
+      {
+        "from": "logs",
+        "to": "resources/logs",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "backupSemanal",
+        "to": "resources/backupSemanal",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
   "devDependencies": {
-    "electron": "^3.0.7"
+    "electron": "6.0.10",
+    "electron-builder": "^21.2.0"
+  },
+  "dependencies": {
+    "dialog": "^0.3.1",
+    "electron-log": "^3.0.8",
+    "electron-squirrel-startup": "^1.0.0",
+    "file-saver": "^2.0.0",
+    "fresh": "^0.5.2",
+    "fs": "0.0.1-security",
+    "html2canvas": "^1.0.0-alpha.12",
+    "jquery": "^3.4.0",
+    "jsdom": "^14.0.0",
+    "mime": "^2.4.2",
+    "mysql": "github:mysqljs/mysql",
+    "mysqldump": "^3.1.0",
+    "path": "^0.12.7",
+    "remote": "^0.2.6",
+    "send": "^0.16.2",
+    "simple-node-logger": "^18.12.23",
+    "sweetalert2": "^7.29.0",
+    "webcamjs": "^1.0.25"
   }
 }

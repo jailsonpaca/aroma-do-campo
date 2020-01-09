@@ -1,19 +1,1036 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="pt-br">
+
+<head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+    <title>Aroma do Campo</title>
+    <script>
+        window.$ = window.jQuery = require('./js/jquery-3.4.0.min.js');
+    </script>
+    <script src='js/jquery-ui-1.12.1/jquery-ui.min.js'></script>
+    <script src='fullcalendar/js/moment.min.js'></script>
+    <script defer src="font/fontawesome-free-5.5.0-web/js/all.js"></script>
+    <link href="font/fontawesome-free-5.5.0-web/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href="js/jquery-ui-1.12.1/jquery-ui.min.css">
+
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="css/index.css">
 
     <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
+        if (window.module) module = window.module;
     </script>
-  </body>
+    <script>
+        $(document).ready(function() {
+                 
+            show('t1', 'l1');
+            var state = 0,
+                cont = 0,
+                num = 0;
+            var clienteData = [];
+            var atividadesData = [];
+            var ocult = 1;
+            var now = new Date();
+            var day = ("0" + now.getDate()).slice(-2);
+            var month = ("0" + (now.getMonth() + 1)).slice(-2);
+            var today = now.getFullYear() + "-" + (month) + "-" + (day);
+
+            $('#daySet').val(today);
+            var now = moment();
+            var monday = now.clone().weekday();
+            
+            
+            
+
+           
+            //swal(process.resourcesPath);
+                const fs = require('fs'); 
+                const path = require('path');
+              
+                fs.stat(`${process.resourcesPath.replace(/\\/g, "/")}/backupSemanal/backup ${today}.sql`, function(err, stat) {
+                    if(err == null) {
+                        console.log('Backup já feito');
+                    } else if(err.code === 'ENOENT') {
+                        // file does not exist
+                        const mysqldump = require('mysqldump');
+                        mysqldump({
+                    connection: {
+                        host: 'localhost',
+                        user: 'root',
+                        password: 'sanduba',
+                        database: 'aroma',
+                    },
+                    dumpToFile:`${process.resourcesPath.replace(/\\/g, "/")}/backupSemanal/backup ${today}.sql`,
+                    DumpOptions:{
+                        excludeTables:true,
+                    }
+                });
+                    } else {
+                        console.log('Some other error: ', err.code);
+                    }
+                });
+               
+          
+                
+
+            $('#btn_back').on('click', function() {
+                var now = moment($('#daySet').val()).format('YYYY-MM-DD');
+                now = moment(now, 'YYYY-MM-DD').add(-1, 'days');
+                now = moment(now).format('YYYY-MM-DD');
+                $('#daySet').val(now);
+                $('#daySearch').each(function() {
+                    $(this).trigger('click');
+                });
+            });
+
+            $('#btn_next').on('click', function() {
+                var now = moment($('#daySet').val()).format('YYYY-MM-DD');
+                now = moment(now, 'YYYY-MM-DD').add(1, 'days');
+                now = moment(now).format('YYYY-MM-DD');
+                $('#daySet').val(now);
+                $('#daySearch').each(function() {
+                    $(this).trigger('click');
+                });
+            });
+
+            $("#tablet").on('change', 'input ', function() {
+                console.log("mudou");
+                soma(1);
+                $(this).closest('tr').find("button ").prop("disabled", false);
+            });
+            $("#tablet2").on('change', 'input ', function() {
+                console.log("mudou");
+                soma(2);
+                $(this).closest('tr').find("button").prop("disabled", false);
+            });
+
+            function showLabel(element, value, nome) {
+
+                var table;
+                $(element).closest('tr').find("td").eq(4).find('input').val(nome);
+                //console.log($(element).closest('tr').find("td").eq(4).find('input').val());
+                if ($(element).parents('table').attr('id') == 'tablet') {
+                    table = 1;
+                }
+                if ($(element).parents('table').attr('id') == 'tablet2') {
+                    table = 2;
+                }
+                if (value != -1) {
+                    console.log("id: " + $(element).closest('tr').find("td").eq(0).html() + "num: " + $(element).closest('tr').find("td").eq(1).html() + " value: " + value);
+                    $(element).closest('tr').find("td").eq(2).find(' .btnSaveAt').attr("onclick", "saveAt(" + ($(element).parents('tr').index() + 1) + "," + table + ")");
+                    $(element).closest('tr').find("td").eq(6).find('.btn-danger').attr("onclick", "remove(" + $(element).closest('tr').find("td").eq(0).html() + "," + table + ")");
+                    $(element).closest('tr').find("td").eq(1).html(value);
+
+                } else {
+                    //console.log("id: "+$(element).closest('tr').find("td").eq(0).html()+"num: "+$(element).closest('tr').find("td").eq(1).html()+" value: "+value);
+                    $(element).closest('tr').find("td").eq(2).find('.btnSaveAt').attr("onclick", "saveAt(" + ($(element).parents('tr').index() + 1) + "," + table + ")");
+                    $(element).closest('tr').find("td").eq(6).find('.btn-danger').attr("onclick", "remove(" + $(element).closest('tr').find("td").eq(0).html() + "," + table + ")");
+                    $(element).closest('tr').find("td").eq(1).html(-1);
+                }
+                return;
+            }
+
+            var connection = mysql.createConnection({
+                host: 'localhost',
+                user: 'root',
+                password: 'sanduba',
+                dateStrings: true,
+                multipleStatements: true,
+                database: 'aroma'
+
+
+            });
+            //----------------------------
+
+            connection.connect();
+
+            var sql = 'SELECT nome,id FROM `cliente`';
+            connection.query(sql, function(err, result) {
+                if (err) {
+                    throw err
+                } else {
+                    //console.log(result);
+
+                    for (i = 0; i < result.length; i++) {
+                        clienteData.push({
+                            value: result[i].nome,
+                            label: result[i].nome,
+                            nome: result[i].nome,
+                            id: result[i].id,
+                            index: i,
+                            se: 0
+                        });
+
+                    }
+                    $('[id^=nomee]').each(function() {
+                        $(this).autocomplete({
+                            source: clienteData,
+                            autoFocus: true,
+                            select: function(event, ui) {
+                                event.preventDefault();
+                                $(this).val(ui.item.value);
+                                if (ui.item.op == "no") {
+
+                                    showLabel(this, -1, ui.item.value);
+                                } else {
+                                    showLabel(this, clienteData[ui.item.index].id, ui.item.value);
+                                }
+
+                                return false;
+                            },
+                            response: function(event, ui) {
+                                // ui.content is the array that's about to be sent to the response callback.
+                                if (ui.content.length === 0) {
+                                    $("#empty-message").text("No results found");
+                                    var noResult = {
+                                        value: $(this).val(),
+                                        label: "Cliente novo",
+                                        op: "no"
+                                    };
+                                    ui.content.push(noResult);
+                                    return false;
+                                } else {
+                                    $("#empty-message").empty();
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+
+            function setValor(element, nome, valor) {
+
+                $(element).closest('tr').find("td").eq(5).find('input').val(valor);
+                $(element).closest('tr').find("td").eq(6).find('input').val(nome);
+
+                return;
+            }
+
+            sql = 'SELECT nome_ati,valor,cod_atividade FROM `atividades`';
+            connection.query(sql, function(err, result) {
+                if (err) {
+                    throw err
+                } else {
+                    //console.log(result);
+
+                    for (i = 0; i < result.length; i++) {
+
+                        atividadesData.push({
+                            value: result[i].valor,
+                            label: result[i].nome_ati,
+                            id: result[i].cod_atividade,
+                            index: i,
+                            valor: result[i].valor
+                        });
+
+                    }
+
+
+                    $('[id^=procei]').each(function() {
+                        $(this).autocomplete({
+                            source: atividadesData,
+                            autoFocus: true,
+                            select: function(event, ui) {
+                                event.preventDefault();
+                                $(this).val(ui.item.label);
+
+
+                                setValor(this, atividadesData[ui.item.index].label, atividadesData[ui.item.index].valor);
+
+
+                                return false;
+                            }
+                        });
+                    });
+                }
+            });
+            $('[id^=procei]').each(function() {
+                $(this).autocomplete({
+                    source: atividadesData,
+                    autoFocus: true,
+                    select: function(event, ui) {
+                        event.preventDefault();
+                        $(this).val(ui.item.label);
+
+
+                        setValor(this, atividadesData[ui.item.index].label, atividadesData[ui.item.index].valor);
+
+
+                        return false;
+                    }
+                });
+            });
+            $('[id^=name]').each(function() {
+                $(this).autocomplete({
+                    source: clienteData,
+                    autoFocus: true,
+                    select: function(event, ui) {
+                        event.preventDefault();
+                        $(this).val(ui.item.value);
+                        if (ui.item.op == "no") {
+
+                            showLabel(this, -1, ui.item.value);
+                        } else {
+                            showLabel(this, clienteData[ui.item.index].id, ui.item.value);
+                        }
+
+                        return false;
+                    },
+                    response: function(event, ui) {
+                        // ui.content is the array that's about to be sent to the response callback.
+                        if (ui.content.length === 0) {
+                            $("#empty-message").text("No results found");
+                            var noResult = {
+                                value: $(this).val(),
+                                label: "Cliente novo",
+                                op: "no"
+                            };
+                            ui.content.push(noResult);
+                            return false;
+                        } else {
+                            $("#empty-message").empty();
+                        }
+                    }
+                });
+            });
+
+            $('#plus').on("click", function() {
+
+                t1 = $('#tablet tr').length - 1;
+                //onclick="saveAt(` + ($(this).index + 2) + `,1);"
+                $('#tablet tr:last').before(`<tr style="background-color:#ACABB1;"><td class="invisible" style='display: none; !important;'>` + (-1) + `</td><td class="invisible" style='display: none; !important;'>` + (-1) + `</td><td style="display: inline-flex;"><button  type="button" class="btn btn-info btn-ati btnSaveAt"  onclick="saveAt(` + ($(this).index() + 2) + `,1);"><div class="textSaveAt">SV</div></button><button id="btnColor" type="button" class="btn btn-info  btnSaveAt2" onclick="colorAt(` + t1 + `,1);"><div class="textColor">cor</div></button></td>` + "<td >" +
+                    `<input class="form-control transparent-input " type="time" id="horarioi"/></td><td  id="nome"><input class="form-control transparent-input" type="text" onkeypress="this.style.width = ((this.value.length + 1) * 8) + 'px';" id="nomee">` + `</td><td ><input class="form-control transparent-input"  id="valori">` + `</td><td ><input class="form-control transparent-input"  id="procei">` + `</td><td><button type="button" class="btn btn-danger btn-exc" onclick="clean_tr(` + ($(this).index() + 2) + `);">Limpar</button></td></tr>`);
+
+                $('[id^=procei]').each(function() {
+                    $(this).autocomplete({
+                        source: atividadesData,
+                        autoFocus: true,
+                        select: function(event, ui) {
+                            event.preventDefault();
+                            $(this).val(ui.item.label);
+
+
+                            setValor(this, atividadesData[ui.item.index].label, atividadesData[ui.item.index].valor);
+
+
+                            return false;
+                        }
+                    });
+                });
+
+                $('[id^=nomee]').each(function() {
+                    $(this).autocomplete({
+                        source: clienteData,
+                        autoFocus: true,
+                        select: function(event, ui) {
+                            event.preventDefault();
+                            $(this).val(ui.item.value);
+                            if (ui.item.op == "no") {
+
+                                showLabel(this, -1, ui.item.value);
+                            } else {
+                                showLabel(this, clienteData[ui.item.index].id, ui.item.value);
+                            }
+
+                            return false;
+                        },
+                        response: function(event, ui) {
+                            // ui.content is the array that's about to be sent to the response callback.
+                            if (ui.content.length === 0) {
+                                $("#empty-message").text("No results found");
+                                var noResult = {
+                                    value: $(this).val(),
+                                    label: "Cliente novo",
+                                    op: "no"
+                                };
+                                ui.content.push(noResult);
+                                return false;
+                            } else {
+                                $("#empty-message").empty();
+                            }
+                        }
+                    });
+                });
+
+            });
+            $('#plus2').on("click", function() {
+                t2 = $('#tablet2 tr').length - 1;
+                $('#tablet2 tr:last').before(`<tr style="background-color:#ACABB1;"><td class="invisible" style='display: none; !important;'>` + (-1) + `</td><td class="invisible" style='display: none; !important;'>` + (-1) + `</td><td style="display: inline-flex;"><button  type="button" class="btn btn-info btn-ati btnSaveAt"  onclick="saveAt(` + ($(this).index() + 2) + `,2);"><div class="textSaveAt">SV</div></button><button id="btnColor" type="button" class="btn btn-info  btnSaveAt2" onclick="colorAt(` + t2 + `,2);"><div class="textColor">cor</div></button></td>` + "<td >" +
+                    `<input class="form-control transparent-input " type="time" id="horarioi"/></td><td  id="nome"><input class="form-control transparent-input" type="text" onkeypress="this.style.width = ((this.value.length + 1) * 8) + 'px';" id="nomee">` + `</td><td ><input class="form-control transparent-input"  id="valori">` + `</td><td ><input class="form-control transparent-input"  id="procei">` + `</td><td><button type="button" class="btn btn-danger btn-exc" onclick="clean_tr(` + ($(this).index() + 2) + `);">Limpar</button></td></tr>`);
+                $('[id^=nomee]').each(function() {
+                    $(this).autocomplete({
+                        source: clienteData,
+                        autoFocus: true,
+                        select: function(event, ui) {
+                            event.preventDefault();
+                            $(this).val(ui.item.value);
+                            if (ui.item.op == "no") {
+
+                                showLabel(this, -1, ui.item.value);
+                            } else {
+                                showLabel(this, clienteData[ui.item.index].id, ui.item.value);
+                            }
+
+                            return false;
+                        },
+                        response: function(event, ui) {
+                            // ui.content is the array that's about to be sent to the response callback.
+                            if (ui.content.length === 0) {
+                                $("#empty-message").text("No results found");
+                                var noResult = {
+                                    value: $(this).val(),
+                                    label: "Cliente novo",
+                                    op: "no"
+                                };
+                                ui.content.push(noResult);
+                                return false;
+                            } else {
+                                $("#empty-message").empty();
+                            }
+                        }
+                    });
+                });
+                $('[id^=procei]').each(function() {
+                    $(this).autocomplete({
+                        source: atividadesData,
+                        autoFocus: true,
+                        select: function(event, ui) {
+                            event.preventDefault();
+                            $(this).val(ui.item.label);
+
+
+                            setValor(this, atividadesData[ui.item.index].label, atividadesData[ui.item.index].valor);
+
+
+                            return false;
+                        }
+                    });
+                });
+            });
+
+
+        });
+    </script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/backend.js"></script>
+
+</head>
+
+<body>
+
+    <div id="msgLoading">
+        <!-- you can set whatever style you want on this -->
+        <div class="fa-3x">
+            <i class="fas  fa-circle-notch fa-spin" style="font-size:400px; margin-top:200px;margin-left: 500px;"></i>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="container c" style="display: none;">
+        <div class="row " style="width: 100% !important;">
+            <div class="sidebar" id="sidebar_id" style="width: 5.4% !important;margin-left: 1%; position:fixed; z-index:3;">
+
+                <div class="menu-list">
+
+                    <ul id="menu-content" class="sidem menu-content  ">
+                        <li>
+                            <div class="card logo bg-transparent ">
+                                <img class="card-img " src="img/logo.jpg" alt="logo">
+                            </div>
+                        </li>
+                        <li id="l1" class=" active s1">
+                            <div id="contentli">
+                                <a href="#" onclick="return show('t1','l1');">
+                                    <i class="fa fa-home fa-lg iconSide"></i> Tela inicial
+                                </a>
+                            </div>
+                        </li>
+
+                        <li id="l2" data-toggle="collapse" class="collapsed s1">
+                            <div id="contentli"><a href="#" onclick="return show('t2','l2'); "><i class="fa fa-heart fa-lg iconSide"></i>  Atividades</a>
+                            </div>
+                        </li>
+
+
+
+                        <li id="l3" data-toggle="collapse" data-target="#service" class="s1">
+                            <div id="contentli"><a href="#" onclick="return show('t3','l3');"><i class="fa fa-user fa-lg iconSide"></i> Clientes</a>
+                            </div>
+                        </li>
+
+                        <li id="l4" class="s1">
+                            <div id="contentli">
+                                <a href="#" onclick="return show('t4','l4');"><img class="iconSide" src="img/coin.png"></img>
+                                    <!--<i class="fa fa-money-bill-alt fa-lg"></i>-->Despesas</a>
+                            </div>
+                        </li>
+                        <li id="l7" class="s1">
+                            <div id="contentli"><a href="#" onclick="return show('t7','l7');"><i class="fa fa-handshake fa-lg iconSide"></i> Indicações</a>
+                            </div>
+                        </li>
+
+
+
+                        <li id="l5" class="s1">
+                            <div id="contentli">
+                                <a href="#">
+                                    <i class="fa fa-file fa-lg iconSide"></i> Fichas
+                                </a>
+                            </div>
+                        </li>
+
+                        <li id="l6" class="s1">
+                            <div id="contentli">
+                                <a href="#" onclick="return show('t6','l6');">
+                                    <i class="fa fa-calendar fa-lg iconSide"></i> Atendimentos
+                                </a>
+                            </div>
+                        </li>
+                        <li style="cursor: default;background-color: #00702D;border: transparent;width: 250px;height:40px;" class="s1"><span style="
+                          display: inline-block;
+                          width: 60px;
+                          height: 60px;
+                      "></span></li>
+                        <li class="s1" id="refreshb">
+                            <!--<button type="button" class="btn bcm" name="button" onclick="bc(1);"></button>-->
+                            <!--<button type="button" class="btn bcv" name="button" onclick="bc(2);"></button>-->
+                            <div id="contentli"><a onclick="refresh();"><i class="fa fa-sync iconSide" ></i>  Atualizar</a>
+                            </div>
+                        </li>
+
+
+                    </ul>
+
+                </div>
+            </div>
+
+
+            <div class="col-11" id="t1" style=" margin-left: 6%; padding-left: 0%; margin-top:20px;">
+
+
+                <div id="contain">
+                    Olá!
+                    <div id=flip>
+                        <div>
+                            <div>Aroma do Campo</div>
+                        </div>
+                        <div>
+                            <div>Aroma do Campo</div>
+                        </div>
+                        <div>
+                            <div>Aroma do Campo</div>
+                        </div>
+                    </div>
+                    <script type="text/javascript">
+                        tday = new Array("Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado");
+
+
+                        function GetClock() {
+                            var d = new Date();
+                            var nday = d.getDay(),
+                                nmonth = d.getMonth() + 1,
+                                ndate = d.getDate(),
+                                nyear = d.getYear(),
+                                nhour = d.getHours(),
+                                nmin = d.getMinutes(),
+                                nsec = d.getSeconds(),
+                                ap;
+
+                            if (nhour == 0) {
+                                ap = " AM";
+                                nhour = 12;
+                            } else if (nhour < 12) {
+                                ap = " AM";
+                            } else if (nhour == 12) {
+                                ap = " PM";
+                            } else if (nhour > 12) {
+                                ap = " PM";
+                                nhour -= 12;
+                            }
+
+                            if (nyear < 1000) nyear += 1900;
+                            if (nmin <= 9) nmin = "0" + nmin;
+                            if (nsec <= 9) nsec = "0" + nsec;
+
+                            document.getElementById('datam').innerHTML = "" + tday[nday] + "," + ndate + "/" + nmonth + "/" + nyear + " " + nhour + ":" + nmin + ":" + nsec + ap + "";
+                        }
+
+                        window.onload = function() {
+                            GetClock();
+                            setInterval(GetClock, 1000);
+                        }
+                    </script>
+                    <div id="clockbox"></div>
+                    <span id="datam"></span>
+                    <br></br>
+                    <div id="cont_bb29b5d7e5e56b7a088c3659a28bb4e5">
+                        <script type="text/javascript" async src="https://www.tempo.com/wid_loader/bb29b5d7e5e56b7a088c3659a28bb4e5"></script>
+                    </div>
+                </div>
+                <br/>
+                <br/>
+
+            </div>
+            <div class="col-11 " id="t2" style="display:none; margin-left: 7%;  padding-left: 0%; margin-top:20px;">
+                <div class="row">
+
+                    <table class="table  table-bordered col-9" id="table">
+                        <thead class="thead-light">
+
+                            <th scope="col" id="headt">Nome</th>
+                            <th scope="col" id="headt">Preço</th>
+                            <th scope="col" id="headt">Data de Adição</th>
+                            <th scope="col" id="headt">Excluir/Editar</th>
+
+
+
+                        </thead>
+                        <tbody id="TableData2">
+
+                            <script>
+                                mostrar(2);
+                            </script>
+                        </tbody>
+
+
+
+                    </table><span style="display:inline-block; width: 3%;"></span>
+                    <button type="button" class="btn btn-primary btn-ada " onclick="add(1);">
+                    Adicionar Atividade</button>
+                </div>
+
+            </div>
+            <div class="col-11 " id="t3" style="display:none; margin-left: 6%;  padding-left: 0%; margin-top:20px;">
+
+
+                <div class="row">
+                    <!--<button type="button" class="btn btn-primary btn-ada" onclick="add(2);">
+                Adicionar Cliente</button>-->
+                    <form class="navbar-form col-6" role="search" id="search_form" action="#" Onclick="return false;">
+                        <div class="input-group add-on">
+                            <input class="form-control" placeholder="Pesquisar clientes" name="srch-term" id="search1" type="search">
+                            <div class="input-group-btn">
+                                <button type="submit" class="btn btn-default" id="search_cli" onclick="search(1);"><i class="fa fa-search"></i></button>
+                                <!--<input type="submit" class="btn btn-default" value="Pesquisar" id="search_cli" onclick="search(1);"/>-->
+                            </div>
+                        </div>
+                    </form>
+                    <button type="button" class="btn btn-primary btn-ada" onclick="add(2);">
+                Adicionar Cliente</button>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <br></br>
+                        <br/>
+                        <table class="table  table-bordered col-4" id="table">
+                            <thead class="thead-light">
+
+                                <th scope="col" id="headt">Nome</th>
+                                <th scope="col" id="headt">Número</th>
+                                <th scope="col" id="headt">Data</th>
+                                <th scope="col" id="headt">Excluir</th>
+                                <th scope="col" id="headt">Ficha</th>
+
+
+
+
+                            </thead>
+                            <tbody id="TableData1" class="tabledata1">
+
+                                <!-- <script>mostrar(1);</script>-->
+                            </tbody>
+
+
+
+                        </table>
+                    </div>
+                    <div class="col-5 " style="margin-left: 25%;">
+                        <br/>
+                        <h2 style="width: 150%;">Clientes para Adicionar:</h2>
+                        <!--   <span style="display:inline-block; width: 9%;"></span> <div class="row justify-content-en">
+                    <h2>Clientes para Adicionar:</h2>-->
+                        <table class="table  table-bordered col-5 " id="table2">
+                            <thead class="thead-light">
+
+                                <th scope="col" id="headt">Nome</th>
+                                <th scope="col" id="headt">Excluir</th>
+                                <th scope="col" id="headt">Ficha</th>
+
+
+
+
+                            </thead>
+                            <tbody id="TableData14">
+
+                                <script>
+                                    mostrar(14);
+                                </script>
+                            </tbody>
+
+
+
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-11 col-md-11 " id="t7" style="display:none; margin-left: 6%;  padding-left: 0%; margin-top:20px;">
+
+
+                <table class="table  table-bordered" id="table">
+                    <thead class="thead-light">
+
+                        <th scope="col" id="headt">Nome</th>
+                        <th scope="col" id="headt">Numero</th>
+                        <th scope="col" id="headt">Indicações</th>
+                        <th scope="col" id="headt">Zerar</th>
+
+
+
+                    </thead>
+                    <tbody id="TableData15">
+
+                        <script>
+                            mostrar(15);
+                        </script>
+                    </tbody>
+
+
+
+                </table>
+            </div>
+            <div class="col-11 " id="t4" style="display:none;margin-left: 7%;  padding-left: 0%; margin-top:20px;">
+                <div class="row">
+                    <table class="table  table-bordered col-9" id="table">
+                        <thead class="thead-light">
+
+                            <th scope="col" id="headt">Descrição</th>
+                            <th scope="col" id="headt">Valor</th>
+                            <th scope="col" id="headt">Data de Adição</th>
+                            <th scope="col" id="headt">Prazo</th>
+                            <th scope="col" id="headt">Excluir</th>
+
+
+
+                        </thead>
+                        <tbody id="TableData3">
+
+                            <script>
+                                mostrar(3);
+                            </script>
+                        </tbody>
+
+
+
+                    </table>
+                    <span style="display:inline-block; width: 3%;"></span>
+                    <button type="button" class="btn btn-primary btn-ada" onclick="add(3);">
+                    Adicionar Despesas</button>
+                </div>
+            </div>
+            <!--<div class="col-9 " id="t5" style="display:none">-->
+            <div class="col-11 col-md-11" id="t5" style="display:none;margin-left: 6%;  padding-left: 0%;margin-top:20px;">
+                <form id="formFICHA">
+                    <div class="form-group">
+
+                        <label for="ficharea"><h2>Ficha do Cliente:</h2></label>
+                        <div class="row justify-content-between">
+                            <div class="card col-lg-4 col-sm-4" style="background-color: #E7ECF0 !important;">
+
+                                <img id="clienteimg" alt="User Pic" src="img/logo.jpg" class="card-img-top img-fluid" style="margin-left: 0px !important;">
+
+                                <div class="card-body text-center">
+                                    <button type="button" class="btn btn-info btn-ati" id="buts4"> <i class="fa fa-camera fa-lg"></i><span style="display:inline-block; width: 4%;"></span>Mudar Foto</button><span style="display:inline-block; width: 7%;"></span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card text-center" style="background-color: #E7ECF0 !important;">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Número de indicaçoes:</h5>
+                                        <div class="row"><span style='margin-right:5%;  display:inline-block;'></span>
+                                            <input type="button" class="btn btn-warning btn-lg" id="clienteindicacao" disabled></input>
+                                            <span style='margin-right:5%;  display:inline-block;'></span><input id="input_zerar" class="form-control" style="width:30%;" type="text">
+                                            <span style='margin-right:5%;  display:inline-block;'></span>
+                                            <button type="button" class="btn btn-danger btn-lg btn-ada" id="buts3">Mudar</button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="form-row">
+
+                            <div class="form-group col-md-6">
+
+                                <label for="inputEmail4">Nome</label>
+                                <input type="text" class="form-control" id="clientenome" value="fulano" placeholder="Digite nome e sobrenome" required>
+
+
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputPassword4">Numero de telefone/celular</label>
+                                <input type="text" class="form-control" id="clientenumero" value="000000000" placeholder="Sem parenteses e traços" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="inputEmail4">Data de nascimento</label>
+                                <input type="date" class="form-control" id="clientedatan" value="2000-10-02" placeholder="Digite nome e sobrenome" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputPassword4">Data de adição:</label>
+                                <input type="date" class="form-control" id="clientedata" value="2000-10-02" placeholder="Sem parenteses e traços" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="inputState">Estado civil:</label>
+                                <select id="inputState" class="form-control" required>
+                                <option selected><div ></div></option>
+                                <option>Solteiro</option>
+                                  <option>Casado</option>
+                                  <option>Viuvo(a)</option>
+                              </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputState">Medicação controlada:</label>
+                                <input type="text" class="form-control" value="nenhuma" id="clientemedicacao" placeholder="Digite aqui" required>
+
+
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="inputPassword4">Profissão:</label>
+                                <input type="text" class="form-control" id="clienteprofissao" value="nenhuma" placeholder="Digite aqui" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputState">Cirurgias/Fraturas:</label>
+
+                                <textarea class="form-control" id="clientecirurgia" value="nenhuma" rows="3"required></textarea>
+
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="inputAddress">Cidade</label>
+                                <input type="text" class="form-control" id="clientecidade" value="Morro da Fumaça" placeholder="Digite a cidade" required>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="inputAddress2">Bairro</label>
+                                <input type="text" class="form-control" id="clientebairro" value="Rodovia Massueto Maccari" placeholder="Digite o bairro" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="inputAddress2">Rua</label>
+                                <input type="text" class="form-control" id="clienterua" value="Rodovia Massueto Maccari" placeholder="Digite a rua" required>
+                            </div>
+
+                            <div class="form-group col-md-2">
+                                <label for="inputZip">Numero</label>
+                                <input type="text" class="form-control" id="clientenumero_end" value="00" placeholder="Ou 00" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-9">
+                                Apartamento(se houver):
+                            </div>
+                            <div class="form-group col-md-4">
+
+                                <label for="inputAddress2">Nome do Apartamento</label>
+                                <input type="text" class="form-control" id="clientenome_apartamento" value="nenhum" placeholder="Digite aqui" required>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label for="inputAddress2">Número</label>
+                                <input type="text" class="form-control" id="clientenumero_apartamento" value="00" placeholder="Digite" required>
+
+                            </div>
+                        </div>
+
+
+                        <label for="inputAddress">Atendimentos:</label>
+                        <br>
+                        <svg width="20" height="20" style="margin-right: 4px; ">
+                            <rect  width="20" height="20" style="fill:#609147;stroke-width:3;stroke:rgb(0,0,0)" />
+                            Sorry, your browser does not support inline SVG.  
+                        </svg> 30 dias em dinheiro
+                        <svg width="20" height="20" style="margin-right: 4px; ">
+                           <rect width="20" height="20" style="fill:#5FA075;stroke-width:3;stroke:rgb(0,0,0)" />
+                        </svg> Dinheiro do banco
+                        <svg width="20" height="20" style="margin-right: 4px; ">
+                           <rect width="20" height="20" style="fill:#6C585A;stroke-width:3;stroke:rgb(0,0,0)" />
+                        </svg> Cartão
+                        <svg width="20" height="20" style="margin-right: 4px; ">
+                           <rect width="20" height="20" style="fill:#ACABB1;stroke-width:3;stroke:rgb(0,0,0)" />
+                        </svg> Pago
+                        <svg width="20" height="20" style="margin-right: 4px; ">
+                           <rect width="20" height="20" style="fill:#AB9532;stroke-width:3;stroke:rgb(0,0,0)" />
+                        </svg> Paga depois
+                        <br>
+                        <table class="table  table-bordered col-3" id="tableF">
+                            <thead class="thead-light">
+
+                                <th scope="col" id="headt">Data</th>
+                                <th scope="col" id="headt">Horário</th>
+                                <th scope="col" id="headt">Procedimento</th>
+                                <th scope="col" id="headt">Pagamento</th>
+                                <th scope="col" id="headt">Valor</th>
+
+
+                            </thead>
+                            <tbody id="TableFicha">
+
+
+                            </tbody>
+
+
+                        </table>
+                        <label for="inputAddress">Histórico do paciente:</label>
+                        <textarea class="form-control" id="ficharea" rows="10" value=" " required>
+
+                              </textarea>
+                    </div>
+                    <div id="buts">
+
+                        <button type="submit" class="btn btn-success btn-ada" id="buts1">Salvar</button>
+                        <button class=" btn btn-danger btn-exc" type="button" name="button" id="buts2">Limpar</button>
+                    </div>
+                </form>
+                
+                <br>
+
+
+
+            </div>
+
+            <div class="col-11 " id="t6" style="display:none; margin-left: 6%;  padding-left: 0%;padding-right:0 !important; margin-top:20px;">
+                <button class="btn btn-default" id="btn_back" style="margin-left: 5px; "><i class="fa fa-arrow-left" aria-hidden="true"></i></button>
+                <button class="btn btn-success" onclick="clica();">Salvar Tudo</button>
+                <button type="button" class="btn btn-primary" style="background-color: pink; border-color: pink;" id="plus"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                <span style="display:inline-block; width: 0%;"></span>
+                <input type="date" id="daySet" placeholder="Insira o dia" style="margin-left: 23%; background-color: rgb(221, 221, 221); width: 140px;border-radius: .25rem;border-color:rgb(221, 221, 221);  height: 38px;   padding-bottom: 4px;" />
+                <button class="btn btn-info" id="daySearch" onclick="searchDay();" style="margin-right:28%;">Pesquisar</button>
+                <span style="display:inline-block; width: 0%;"></span>
+                <button type="button" class="btn btn-primary " style="background-color:#60BDFF; border-color:#60BDFF;" id="plus2"><i class="fa fa-plus" aria-hidden="true"></i></button>
+
+
+                <button class="btn btn-default" id="btn_next"><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+                <div class="row" style="margin-left: 5px; margin-top: 20px;">
+                    <input style="width:2.5%; height: 22px;" accesskey="q" type="checkbox" onchange='handleChange(this);' value="#609147" placeholder="bla" id="y1" style="background: #609147;">
+                    <svg width="20" height="20" style="margin-right: 4px; ">
+                        <rect  width="20" height="20" style="fill:#609147;stroke-width:3;stroke:rgb(0,0,0)" />
+                        
+                        Sorry, your browser does not support inline SVG.  
+                      </svg> 30 dias em dinheiro <input style="width:2.5%; height: 22px; " accesskey="w" type="checkbox" onchange='handleChange(this);' value="#5FA075" placeholder="bla" id="y2" style="background: #609147;">
+                    <svg width="20" height="20" style="margin-right: 4px; ">
+                       <rect width="20" height="20" style="fill:#5FA075;stroke-width:3;stroke:rgb(0,0,0)" />
+                       </svg> Dinheiro do banco <input style="width:2.5%; height: 22px;  margin-left:4px;" accesskey="e" type="checkbox" onchange='handleChange(this);' value="#6C585A" placeholder="bla" id="y3" style="background: #609147;">
+                    <svg width="20" height="20" style="margin-right: 4px; ">
+                       <rect width="20" height="20" style="fill:#6C585A;stroke-width:3;stroke:rgb(0,0,0)" />
+                       </svg> Cartão <input style="width:2.5%; height: 22px;  margin-left:4px;" type="checkbox" accesskey="r" onchange='handleChange(this);' value="#ACABB1" placeholder="bla" id="y4" style="background: #609147;">
+                    <svg width="20" height="20" style="margin-right: 4px; ">
+                       <rect width="20" height="20" style="fill:#ACABB1;stroke-width:3;stroke:rgb(0,0,0)" />
+                       </svg> Pago <input style="width:2.5%; height: 22px;  margin-left:4px;" type="checkbox" accesskey="t" onchange='handleChange(this);' value="#AB9532" placeholder="bla" id="y5" style="background: #609147;">
+                    <svg width="20" height="20" style="margin-right: 4px; ">
+                       <rect width="20" height="20" style="fill:#AB9532;stroke-width:3;stroke:rgb(0,0,0)" />
+                       </svg> Paga depois
+                    <div class="table-responsive" style="width: 49%; margin-top: 20px;">
+                        <table class="table  table-bordered col-5" id="tablet">
+                            <thead class="thead-light">
+
+                                <th scope="col" id="headt" class="invisible" style='display: none; !important;'>#</th>
+                                <th scope="col" id="headt" class="invisible" style='display: none; !important;'>#</th>
+                                <th scope="col" id="headt">#</th>
+                                <th scope="col" id="headt">Horário</th>
+                                <th scope="col" id="headt">Nome</th>
+                                <th scope="col" id="headt">Preço</th>
+                                <th scope="col" id="headt">P.mento</th>
+                                <th scope="col" id="headt">Excluir</th>
+
+
+
+                            </thead>
+                            <tbody style="background-color: pink;" id="TableDataAtendimento">
+
+
+                            </tbody>
+                            <script>
+                                mostrar(20);
+                            </script>
+
+
+                        </table>
+                    </div>
+                    <div class="table-responsive" style="width: 49%; margin-top: 20px; margin-left: 6px;">
+                        <table class="table  table-bordered col-5" id="tablet2">
+                            <thead class="thead-light">
+                                <th scope="col" id="headt" class="invisible" style='display: none; !important;'>#</th>
+                                <th scope="col" id="headt" class="invisible" style='display: none; !important;'>#</th>
+                                <th scope="col" id="headt">#</th>
+                                <th scope="col" id="headt">Horário</th>
+                                <th scope="col" id="headt">Nome</th>
+                                <th scope="col" id="headt">Preço</th>
+                                <th scope="col" id="headt">P.mento</th>
+                                <th scope="col" id="headt">Excluir</th>
+
+
+
+                            </thead>
+                            <tbody style="background-color:#60BDFF;" id="TableDataAtendimento2">
+
+
+                            </tbody>
+                            <script>
+                                mostrar(21);
+                            </script>
+
+
+                        </table>
+                    </div>
+                    <div class="input-group" style="font-weight: 800; display:inline-block; background-color:aquamarine; color:grey; max-width: 98.3%;">
+                        <h3 style="font-size: 15px !important;">Soma Total do dia(Andreia + Ronaldo):<span style="display:inline-block; width: 7%; "></span>R$
+                            <div style="display:inline-block;" id="somaDia">0</div>
+                        </h3>
+                        <h3 style="font-size: 15px !important;">Atendimentos desse dia:<span style="display:inline-block; width: 18%;"></span>
+                            <div style="display:inline-block;" id="atendimentoDia">0</div>
+                        </h3>
+                        <h3 style="font-size: 15px !important;">Soma Total da Semana até esse dia:<span style="display:inline-block; width: 10%;"></span>R$
+                            <div style="display:inline-block;" id="somaSemana">0</div>
+                        </h3>
+                        <h3 style="font-size: 15px !important;">Atendimentos da Semana até esse dia:<span style="display:inline-block; width: 10%;"></span>
+                            <div style="display:inline-block;" id="atendimentoSemana">0</div>
+                        </h3>
+                        <h3 style="font-size: 15px !important;">Soma Total do Mês até esse dia:<span style="display:inline-block; width: 12%;"></span>R$
+                            <div style="display:inline-block;" id="somaMes">0</div>
+                        </h3>
+                        <h3 style="font-size: 15px !important;">Atendimentos do Mês até esse dia:<span style="display:inline-block; width: 12%;"></span>
+                            <div style="display:inline-block;" id="atendimentoMes">0</div>
+                        </h3>
+
+                    </div>
+                </div>
+
+                <!-- SCRIPTS -->
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.container').show();
+            $('#msgLoading').hide();
+            soma();
+        });
+    </script>
+
+
+</body>
+
 </html>
