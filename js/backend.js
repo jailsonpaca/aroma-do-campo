@@ -149,14 +149,9 @@ function soma(table) {
     day = moment(day, 'YYYY-MM-DD').add(1, 'days');
    // console.log(day);
     day = moment(day).format('YYYY-MM-DD');
-<<<<<<< HEAD
     console.log(day);
     day = day + " 03:00:00";
     
-=======
-    
-    day = day + " 03:00:00";
->>>>>>> 48546134e843d49fe9b38974c7aa6ea3849ecb6e
     console.log(day);
 
     connection.query(sql, [day, day, day], function(error, results) {
@@ -251,11 +246,7 @@ function clica() {
 
 }
 
-<<<<<<< HEAD
-console.log(moment(data_atendimento).format("YYYY-MM-D HH:mm:ss").hour()); 
-=======
 
->>>>>>> 48546134e843d49fe9b38974c7aa6ea3849ecb6e
 
 function write(num, id, nome, horario, responsavel, valor, procedimento, cor) {
     console.log("write");
@@ -278,7 +269,6 @@ function write(num, id, nome, horario, responsavel, valor, procedimento, cor) {
 
         var sql = `INSERT INTO atendimento(num,id,nome,horario,responsavel,valor,data,procedimento,cor) VALUES(?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE    
   num=?, nome=?,horario=?,responsavel=?,valor=?,data=?,procedimento=?,cor=?`;
-<<<<<<< HEAD
         
         var data_atendimento = $('#daySet').val() + ` ${horario}:00`;
         data_atendimento = moment(data_atendimento).format("YYYY-MM-D HH:mm:ss");
@@ -287,10 +277,6 @@ function write(num, id, nome, horario, responsavel, valor, procedimento, cor) {
             data_atendimento=moment(data_atendimento).add(1,'days').format('YYYY-MM-DD HH:mm:ss');
         };
         console.log(data_atendimento);
-=======
-        var data_atendimento = $('#daySet').val() + ` ${horario}:00`;
-        data_atendimento = moment(data_atendimento).format("YYYY-MM-D HH:mm:ss");
->>>>>>> 48546134e843d49fe9b38974c7aa6ea3849ecb6e
         connection.query(sql, [num, id, nome, horario, responsavel, valor, data_atendimento, procedimento, cor, num, nome, horario, responsavel, valor, data_atendimento, procedimento, cor], function(error) {
             if (error) {
                 console.log(error.code);
@@ -315,14 +301,11 @@ Atendimento realizado no dia e horario: ",(SELECT DATE(data)
         console.log("as");
         var sql = `INSERT INTO atendimento(num,nome,horario,responsavel,valor,data,procedimento,cor) VALUES(?,?,?,?,?,?,?,?)`;
         var data_atendimento = $('#daySet').val() + ` ${horario}:00`;
-<<<<<<< HEAD
         console.log(data_atendimento);
         if(parseInt(moment(data_atendimento).format("HH"),10)>=0 && parseInt(moment(data_atendimento).format("HH"),10)<5){
             data_atendimento=moment(data_atendimento).add(1,'days').format('YYYY-MM-DD HH:mm:ss');
         };
         console.log(data_atendimento);
-=======
->>>>>>> 48546134e843d49fe9b38974c7aa6ea3849ecb6e
         connection.query(sql, [num, nome, horario, responsavel, valor, data_atendimento, procedimento, cor], async function(error) {
             if (error) {
                 error_alert(' ao inserir atendimento');
