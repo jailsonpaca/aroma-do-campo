@@ -1,0 +1,8 @@
+version: 7.0.0
+files:
+  - url: aroma-do-campo-Setup-7.0.0.exe
+    sha512: nmdhmGODsPPRsJf+tA/sLzf2WsmDDhFC44NRPhKQGulPDdyo4KWM2e1buoKpIOWqj4FE9U2bO3zW2y3gp8n0Pg==
+    size: 59393387
+path: aroma-do-campo-Setup-7.0.0.exe
+sha512: nmdhmGODsPPRsJf+tA/sLzf2WsmDDhFC44NRPhKQGulPDdyo4KWM2e1buoKpIOWqj4FE9U2bO3zW2y3gp8n0Pg==
+releaseDate: '2020-02-14T12:17:20.641Z'

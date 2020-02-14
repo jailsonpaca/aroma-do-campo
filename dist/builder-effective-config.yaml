@@ -1,0 +1,17 @@
+directories:
+  output: dist
+  buildResources: build
+appId: AromaDoCampo
+win:
+  target: NSIS
+  icon: build/icon.ico
+extraFiles:
+  - from: logs
+    to: resources/logs
+    filter:
+      - '**/*'
+  - from: backupSemanal
+    to: resources/backupSemanal
+    filter:
+      - '**/*'
+electronVersion: 8.0.0

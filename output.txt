@@ -1,0 +1,2 @@
+
+electron-packager . --platform=win32 --arch=ia32
