@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # electron-quick-start
 
 **Clone and run for a quick way to see Electron in action.**
@@ -39,6 +40,20 @@ Note: If you're using Linux Bash for Windows, [see this guide](https://www.howto
 - [electron/simple-samples](https://github.com/electron/simple-samples) - small applications with ideas for taking them further
 - [electron/electron-api-demos](https://github.com/electron/electron-api-demos) - an Electron app that teaches you how to use Electron
 - [hokein/electron-sample-apps](https://github.com/hokein/electron-sample-apps) - small demo apps for the various Electron APIs
+=======
+# Sistema Aroma do Campo
+
+**Screenshots:**
+<p align="center">
+  <img src="https://i.ibb.co/ns5JJGN/Screen.png">
+</p>
+
+
+
+
+Feito em cima da plataforma electron js, utilizando bootstrap, jquery e javascript como backend.
+para o servidor foi utilizado um MySQL LOCAL
+>>>>>>> 48546134e843d49fe9b38974c7aa6ea3849ecb6e
 
 ## License
 

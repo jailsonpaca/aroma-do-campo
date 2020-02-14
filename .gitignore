@@ -1,1 +1,10 @@
 node_modules
+<<<<<<< HEAD
+=======
+dist
+cursor
+electron-quick-start.rar
+jstest.js
+output.txt
+packageBK.json
+>>>>>>> 48546134e843d49fe9b38974c7aa6ea3849ecb6e
